@@ -1,0 +1,191 @@
+/* ═════════════════════════════════════════════════════════════════════
+   ADVERSARIAL RED-TEAM ARENA STYLES
+   ═════════════════════════════════════════════════════════════════════ */
+
+.arena-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.arena-hero-banner {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(13, 19, 34, 0.9) 60%, rgba(59, 130, 246, 0.12) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 14px;
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(239, 68, 68, 0.05);
+}
+
+.arena-campaigns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .arena-campaigns-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.campaign-card {
+  background: #0d1322;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.campaign-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15);
+}
+
+.campaign-card.selected {
+  border-color: #ef4444;
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.12), #0d1322);
+  box-shadow: 0 0 0 1px #ef4444, 0 8px 28px rgba(239, 68, 68, 0.25);
+}
+
+.campaign-title {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.campaign-desc {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #94a3b8;
+}
+
+/* Dual Battle Terminal */
+.battle-terminal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .battle-terminal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.terminal-box {
+  background: #080c16;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.terminal-box.red-team {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.1);
+}
+
+.terminal-box.blue-team {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+}
+
+.terminal-head {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.terminal-box.red-team .terminal-head {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+}
+
+.terminal-box.blue-team .terminal-head {
+  background: rgba(59, 130, 246, 0.1);
+  color: #60a5fa;
+}
+
+.terminal-body {
+  padding: 14px 16px;
+  height: 280px;
+  overflow-y: auto;
+  font-size: 11.5px;
+  line-height: 1.65;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.terminal-log-line {
+  word-break: break-all;
+  animation: logFadeIn 180ms ease both;
+}
+
+@keyframes logFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scorecard Banner */
+.arena-scorecard {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, #0d1322 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.12);
+  animation: scorecardReveal 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes scorecardReveal {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.scorecard-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scorecard-num {
+  font-size: 24px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: #34d399;
+}
+
+.scorecard-label {
+  font-size: 11px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
