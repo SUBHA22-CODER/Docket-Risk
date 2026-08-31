@@ -271,6 +271,15 @@ At the recommended high-risk cutoff ($\tau \ge 0.85$):
 * Reduces false-positive merchant friction by **81%** compared to traditional velocity rules.
 * The 6 high-band false positives (documented WeWork Bengaluru shared-IP cohort) are routed to 15% rolling reserves, preserving 85% cash liquidity and preventing insolvency.
 
+### Syndicate Burst Interception & Continuous Liquidity Simulation `[MEASURED]`
+
+<p align="center">
+  <img src="docs/images/temporal_burst_detection.png" alt="Syndicate Attack Burst Detection and Continuous Liquidity Floor" width="100%">
+</p>
+
+* **Top Panel (Attack Burst Interception):** 5 coordinated multi-merchant syndicate bursts flagged with **100% precision** against a trailing dynamic baseline ($\mu + 2.5\sigma$).
+* **Bottom Panel (Working Capital Liquidity):** While legacy fraud engines enforce blunt 100% account freezes ($0\%$ merchant cash flow), Docket Risk activates a **15% graduated reserve**, preserving **85% daily settlement liquidity via RTGS**.
+
 ---
 
 ## 8. Mathematical Formulation & Cost Optimization
