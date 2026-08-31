@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🛡️ Docket Risk
+<p align="center">
+  <img src="docs/images/docket_logo.png" alt="Docket Risk Logo" height="52">
+</p>
 
 ### Autonomous Risk Decisioning & Continuous Capital Reserves for Payment Gateways
 
@@ -35,7 +37,7 @@
 </div>
 
 <p align="center">
-  <img src="docs/images/overview_dashboard.png" alt="Docket Risk Operations Console" width="100%">
+  <img src="docs/images/landing_hero.png" alt="Docket Risk Platform Hero and Live Cluster Topology" width="100%">
 </p>
 
 > [!NOTE]
@@ -134,7 +136,16 @@ flowchart TD
 
 ## 4. Core Capabilities & Visual Walkthrough
 
-### 1. Forensic Claims Dossier & Evidence Tree
+### 1. Central Operations & Overview Dashboard
+High-level control room showing real-time settlement liquidity velocity, flagged claim distribution, and graph density KPIs.
+
+<p align="center">
+  <img src="docs/images/overview_dashboard.png" alt="Docket Risk Operations Console" width="100%">
+</p>
+
+---
+
+### 2. Forensic Claims Dossier & Evidence Tree
 Deep investigation view showing exact feature values, monotonic risk scores, and gain-based Shapley contribution vectors.
 
 <p align="center">
@@ -143,7 +154,7 @@ Deep investigation view showing exact feature values, monotonic risk scores, and
 
 ---
 
-### 2. Blast-Radius Network Explorer & Temporal Replay
+### 3. Blast-Radius Network Explorer & Temporal Replay
 A multi-partite graph canvas (identities, devices, VPAs, phones, addresses) for forensic investigation:
 * **Temporal Scrubber:** Step chronologically through fraud ring lifecycles to isolate patient-zero.
 * **Edge Severing:** Simulate cutting shared infrastructure links to dynamically recalculate cluster risk and restore innocent merchants.
@@ -154,7 +165,7 @@ A multi-partite graph canvas (identities, devices, VPAs, phones, addresses) for 
 
 ---
 
-### 3. Real-Time Claims Queue & Policy Decisioning
+### 4. Real-Time Claims Queue & Policy Decisioning
 Live stream of inbound claims categorized into Low, Medium, and High risk bands with instant action triggers.
 
 <p align="center">
@@ -163,7 +174,7 @@ Live stream of inbound claims categorized into Low, Medium, and High risk bands 
 
 ---
 
-### 4. Actuarial Capital-at-Risk Simulator
+### 5. Actuarial Capital-at-Risk Simulator
 An interactive modeling dashboard for risk teams to simulate capital held vs. released across daily settlement cycles.
 
 <p align="center">
@@ -172,7 +183,7 @@ An interactive modeling dashboard for risk teams to simulate capital held vs. re
 
 ---
 
-### 5. Live Red-Team Adversarial Arena
+### 6. Live Red-Team Adversarial Arena
 An interactive attack studio directly integrated with backend scoring. Unlike static prototypes, the arena issues real HTTP requests to `/v1/ingest/order` and `/v1/score`:
 * **Telegram Refund Syndicates:** Simulates coordinated bursts across 4 merchant accounts simultaneously.
 * **Adversarial Stealth Smurfing:** Injects micro-transactions over 72h to test evasion against rolling reserves.
