@@ -11,14 +11,14 @@
 [![Tests](https://img.shields.io/badge/Tests-29%2F29%20Passing-brightgreen.svg?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/SUBHA22-CODER/Docket-Risk)
 [![Latency](https://img.shields.io/badge/P99%20Latency-%3C15ms-blue.svg?style=for-the-badge&logo=speedtest&logoColor=white)](https://github.com/SUBHA22-CODER/Docket-Risk)
 
-[Architecture Blueprint](DOCKET_COMPLETE_SYSTEM_DOCUMENTATION.md) | [Quickstart](#developer-quickstart) | [Live Features](#core-system-capabilities) | [API Reference](#api-specification--quick-test) | [Benchmarks](#measured-performance--calibration-rigor)
+[Architecture](#3-system-architecture) | [Core Features](#4-hero-capabilities) | [Benchmarks](#6-measured-performance--calibration-rigor) | [API Spec](#8-api-specification--curl-examples) | [Quickstart](#9-developer-quickstart)
 
 </div>
 
 ---
 
 > [!NOTE]
-> **Technical Transparency Statement:**
+> **Technical Implementation Statement:**
 > Core scoring, in-memory multi-partite graph clustering, monotonic XGBoost inference, and immutable SQLite audit logging are running live in Python and React. Carrier EDI integrations (BlueDart and Delhivery mTLS tracking APIs) are implemented as realistic schema contracts for demonstration purposes.
 
 ---
@@ -27,27 +27,28 @@
 
 - [1. Executive Summary & Problem](#1-executive-summary--the-settlement-trilemma)
 - [2. Paradigm Shift: Continuous Reserves vs. Binary Freezes](#2-paradigm-shift-continuous-reserves-vs-binary-freezes)
-- [3. Architectural Blueprint](#3-architectural-blueprint)
-- [4. Core System Capabilities](#4-core-system-capabilities)
-- [5. Implementation Status (Real vs. Simulated)](#5-implementation-status-real-vs-simulated)
+- [3. System Architecture](#3-system-architecture)
+- [4. Hero Capabilities](#4-hero-capabilities)
+- [5. Implementation Reality Matrix](#5-implementation-reality-matrix)
 - [6. Measured Performance & Calibration Rigor](#6-measured-performance--calibration-rigor)
 - [7. Production Hardening & Reliability](#7-production-hardening--reliability)
-- [8. API Specification & Quick-Test](#8-api-specification--quick-test)
+- [8. API Specification & cURL Examples](#8-api-specification--curl-examples)
 - [9. Developer Quickstart](#9-developer-quickstart)
-- [10. Limitations & Roadmap](#10-limitations--roadmap)
+- [10. Docker & Production Deployment](#10-docker--production-deployment)
+- [11. Known Limitations & Engineering Roadmap](#11-known-limitations--engineering-roadmap)
 
 ---
 
 ## 1. Executive Summary: The Settlement Trilemma
 
-In modern payment aggregators like Razorpay, risk operations is an economic balancing act between:
+In payment aggregators like Razorpay, risk operations is an economic balancing act between:
 
 $$\text{Expected Chargeback Liability} \quad \longleftrightarrow \quad \text{Merchant Cash-Flow Liquidity} \quad \longleftrightarrow \quad \text{Support Churn Friction}$$
 
 When coordinated fraud syndicates execute refund velocity bursts across disparate merchant accounts, legacy rule engines enforce **binary all-or-nothing holds**:
 
-* **Collateral Merchant Insolvency:** When one compromised physical device coordinates fraud across multiple sellers, legacy engines freeze 100% of settlements across all linked accounts, starving innocent merchants of daily working capital.
-* **Opaque Form Notices:** Sellers receive un-auditable email notices citing generic terms of service clauses with zero evidence or visibility into model weights.
+* **Collateral Merchant Insolvency:** When one compromised device or IP coordinates fraud across multiple sellers, legacy engines freeze 100% of settlement funds across all linked accounts, starving innocent merchants of daily working capital.
+* **Opaque Form Notices:** Sellers receive un-auditable email notices citing generic terms of service clauses with zero visibility into feature attributions or model evidence.
 * **14-Day Support Queues:** When legitimate sellers submit proof of delivery, manual support backlogs take weeks to review tickets, driving merchant churn and competitor migration.
 
 **Docket Risk** reframes payment risk from a binary gate into a **continuous, risk-adjusted capital allocation engine** operating at sub-15ms latency.
@@ -56,10 +57,10 @@ When coordinated fraud syndicates execute refund velocity bursts across disparat
 
 ## 2. Paradigm Shift: Continuous Reserves vs. Binary Freezes
 
-| Decision Dimension | Legacy Rule Gateways | Docket Risk Engine |
+| Dimension | Legacy Rule Gateways | Docket Risk Engine |
 | :--- | :--- | :--- |
 | **Decision Granularity** | Binary: 0% payout or 100% account freeze | Continuous: 0%, 15%, 20%, 25% rolling reserves |
-| **Merchant Working Capital** | 0% liquidity during review cycles | 80% daily settlement liquidity preserved |
+| **Merchant Cash Flow** | 0% liquidity during review cycles | 80%+ daily settlement liquidity preserved |
 | **Syndicate Detection** | Single-account isolated velocity limits | Sub-15ms multi-partite graph clustering ($O(\alpha(N))$) |
 | **Dispute Resolution** | 7-14 day manual ticket queue | Carrier EDI automated verification (< 3 seconds) |
 | **Model Invariance** | Unconstrained black-box trees | Strict monotonic constraints (predictable attributions) |
@@ -67,46 +68,37 @@ When coordinated fraud syndicates execute refund velocity bursts across disparat
 
 ---
 
-## 3. Architectural Blueprint
+## 3. System Architecture
 
+```mermaid
+flowchart TD
+    A[Incoming Transaction Stream] --> B[Deterministic In-Memory Union-Find]
+    B -->|Near O 1 Path Compression| C[Monotonic XGBoost Inference Engine]
+    C -->|Point-in-Time Features| D{Continuous Risk Policy}
+    
+    D -->|Score < 0.50| E[LOW BAND: Instant RTGS Release]
+    D -->|0.50 <= Score < 0.85| F[MEDIUM BAND: 15%-20% Rolling Reserve + Step-Up OTP]
+    D -->|Score >= 0.85| G[HIGH BAND: Pre-Settlement Payout Hold]
+    
+    G --> H[Merchant Appeal Sandbox]
+    H -->|Validate Carrier EDI Proof| I[Sever Peripheral Graph Edge]
+    I -->|Score drops to 3.8%| J[Automated RTGS Payout Release Webhook]
 ```
-                     [Incoming Transaction Stream]
-                                  │
-                                  ▼
-           [Deterministic In-Memory Disjoint Union-Find]
-           • Array-backed graph clustering over VPAs, devices, cards
-           • Near O(1) path compression, zero database latency
-                                  │
-                                  ▼
-                [Monotonic XGBoost Inference Engine]
-           • Strict monotonic density constraints: ∂f/∂x >= 0
-           • Point-in-time features with zero lookahead leakage
-                                  │
-                                  ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        CONTINUOUS RISK DECISION                        │
-├─────────────────────────┬──────────────────────────────┬───────────────┤
-│ Score < 0.50            │ 0.50 <= Score < 0.85         │ Score >= 0.85 │
-│ LOW BAND                │ MEDIUM BAND                  │ HIGH BAND     │
-│ Instant RTGS Release    │ 15%-20% Rolling Reserve      │ Pre-Settlement│
-│ (0% Liquidity Freeze)   │ + Step-Up OTP Verification   │ Payout Hold   │
-└─────────────────────────┴──────────────────────────────┴───────────────┘
-                                  │
-                                  ▼
-                     [Merchant Appeal Sandbox]
-           • Validates BlueDart / Delhivery EDI API proof
-           • Decouples contaminated edges; drops score to 3.8%
-           • Dispatches automated RTGS payout release webhook
-```
+
+### Data Pipeline & Component Responsibilities
+* **Graph Ingestion Layer:** Array-backed disjoint-set data structure linking identities across 5 infrastructure dimensions (`device_id`, `vpa_id`, `phone_id`, `address_id`, `card_id`) in sub-millisecond memory lookups.
+* **Feature Extraction Engine:** Extracts 10 causal point-in-time features under an atomic re-entrant lock, ensuring strict absence of temporal lookahead leakage.
+* **Monotonic XGBoost Engine:** Enforces mathematical gradient constraints ($\partial f / \partial x \ge 0$) on cluster density features to eliminate evasion loopholes.
+* **Dispute & Webhook Dispatcher:** Signs automated release payloads using HMAC-SHA256 and dispatches them to merchant settlement webhooks.
 
 ---
 
-## 4. Core System Capabilities
+## 4. Hero Capabilities
 
 ### ⚔️ Live Red-Team Adversarial Arena
-An interactive attack simulator directly integrated with backend scoring. Unlike static mockups, the arena fires live HTTP requests to `/v1/ingest/order` and `/v1/score`:
+An interactive attack studio directly integrated with backend scoring. Unlike static prototypes, the arena issues real HTTP requests to `/v1/ingest/order` and `/v1/score`:
 * **Telegram Refund Syndicates:** Simulates coordinated bursts across 4 merchant accounts simultaneously.
-* **Adversarial Stealth Smurfing:** Injects micro-transactions over 72h to dilute velocity counters, demonstrating how Docket's policy engine captures evasion via 20% reserves instead of failing silently.
+* **Adversarial Stealth Smurfing:** Injects micro-transactions over 72h to dilute velocity counters, demonstrating how Docket captures evasion via 20% reserves instead of failing silently.
 * **Telemetry HUD:** Displays real live inference scores, decision actions, and millisecond API latency.
 
 ### 🕸️ Blast-Radius Network Explorer & Temporal Replay
@@ -131,7 +123,7 @@ Provides auditable explanations for every flagged transaction:
 
 ---
 
-## 5. Implementation Status (Real vs. Simulated)
+## 5. Implementation Reality Matrix
 
 To provide total clarity for technical reviewers, the matrix below details live runtime code vs. simulated contracts:
 
@@ -181,12 +173,12 @@ Docket is built to meet real payment infrastructure availability constraints:
 * **Dual Fail-Open Protection:** If a model file is missing at startup or scoring experiences an unexpected exception, the engine fails open (`AUTO_APPROVE` with `degraded=true`) to protect checkout conversion. It never returns a 500 status on `/score`.
 * **Atomic Concurrency (No TOCTOU):** Feature computation, graph edge insertion, and claim recording execute under a single critical section lock, preventing race conditions during synchronized attack bursts.
 * **LRU Idempotency Dedup:** Duplicate order IDs and claim IDs are automatically deduplicated in memory.
-* **SHA-256 Model Verification:** The scoring engine computes SHA-256 checksums on load and verifies them against `.sha256` signatures to prevent artifact tampering.
+* **SHA-256 Model Verification:** The scoring engine computes SHA-256 checksums on load and verifies them against `.sha256` signatures using constant-time comparison (`hmac.compare_digest`) to prevent artifact tampering.
 * **Capacity Guards:** Live graph nodes and claim history entries are strictly bounded with automated time-window pruning.
 
 ---
 
-## 8. API Specification & Quick-Test
+## 8. API Specification & cURL Examples
 
 The scoring service exposes production-hardened REST endpoints with API-key authentication (`X-API-Key`):
 
@@ -260,7 +252,36 @@ Open [http://localhost:5173](http://localhost:5173) to access the ops console.
 
 ---
 
-## 10. Limitations & Roadmap
+## 10. Docker & Production Deployment
+
+The project includes a multi-stage Docker build with non-root security (`appuser:10001`) and a Docker Compose stack configured with PostgreSQL 16 and Redis 7:
+
+```bash
+# Build frontend assets
+cd frontend && npm run build && cd ..
+
+# Launch complete containerized stack
+docker compose up --build
+```
+
+### Environment Configuration
+
+| Variable | Required | Default | Description |
+| :--- | :---: | :---: | :--- |
+| `RING_SENTINEL_API_KEYS` | No | `dev-insecure-key-change-me` | Comma-separated API keys for `/v1/` endpoint authentication |
+| `RING_SENTINEL_HIGH` | No | `0.85` | High-risk decision cutoff (triggers payout hold) |
+| `RING_SENTINEL_MEDIUM` | No | `0.50` | Medium-risk cutoff (triggers 15%-20% rolling reserve) |
+| `RING_SENTINEL_MODEL` | No | `models/ring_sentinel_xgb.json` | Path to serialized XGBoost model artifact |
+| `RING_SENTINEL_SNAPSHOT` | No | `data/graph_state_snapshot.json` | Path for periodic graph state disk persistence |
+| `RING_SENTINEL_AUDIT_DB` | No | `data/decisions.db` | SQLite audit database path |
+| `RING_SENTINEL_MAX_NODES` | No | `2000000` | In-memory union-find graph capacity ceiling |
+| `RING_SENTINEL_MAX_CLUSTER`| No | `5000` | Feature capping ceiling for massive cluster sizes |
+| `RING_SENTINEL_RATE_LIMIT` | No | `600` | Per-client rate limit ceiling (requests / minute) |
+| `RING_SENTINEL_LOG_LEVEL`  | No | `INFO` | Structured JSON log verbosity |
+
+---
+
+## 11. Known Limitations & Engineering Roadmap
 
 ### Documented Limitations
 1. **Domestic Currency Rails:** Optimized for INR rails (UPI, IMPS, RTGS). Cross-border currency conversion and SWIFT dispute buffers are out of scope.
@@ -270,7 +291,7 @@ Open [http://localhost:5173](http://localhost:5173) to access the ops console.
 ### Engineering Roadmap
 * **Distributed Redis Cluster Partitioning:** Partition Disjoint Set root keys across a distributed Redis cluster using RedisGraph or Hazelcast to scale beyond a single node memory footprint.
 * **Conformal Risk Bounds:** Incorporate formal conformal risk control to output mathematically guaranteed coverage bands for ambiguous scores.
-* **Dynamic Graph Embeddings:** Implement continuous temporal graph embeddings (e.g. Dynamic Node2Vec) to capture long-horizon syndicate sleep cycles.
+* **Dynamic Graph Embeddings:** Implement continuous temporal graph embeddings (e.g., Dynamic Node2Vec) to capture long-horizon syndicate sleep cycles.
 * **Direct Carrier EDI Integration:** Wire live mTLS webhooks to BlueDart, Delhivery, and India Post production APIs.
 
 ---
