@@ -23,12 +23,12 @@
 </p>
 
 <p align="center">
-  <a href="#the-settlement-trilemma"><b>The Problem</b></a> &nbsp;•&nbsp;
+  <a href="#razorpay-track-02-alignment-what-problem-we-solve"><b>Razorpay Problem</b></a> &nbsp;•&nbsp;
+  <a href="#the-settlement-trilemma-razorpay-ecosystem-context"><b>The Trilemma</b></a> &nbsp;•&nbsp;
   <a href="#system-architecture"><b>Architecture</b></a> &nbsp;•&nbsp;
   <a href="#core-capabilities--visual-walkthrough"><b>Visual Tour</b></a> &nbsp;•&nbsp;
   <a href="#measured-performance--calibration-rigor"><b>Benchmarks</b></a> &nbsp;•&nbsp;
-  <a href="#mathematical-formulation"><b>Math & Cost Model</b></a> &nbsp;•&nbsp;
-  <a href="#api-contract"><b>API Spec</b></a> &nbsp;•&nbsp;
+  <a href="#api-contract--live-payloads"><b>API Spec</b></a> &nbsp;•&nbsp;
   <a href="#developer-quickstart"><b>Quickstart</b></a>
 </p>
 
@@ -48,23 +48,64 @@
 
 ## Table of Contents
 
-- [1. The Settlement Trilemma: Razorpay Ecosystem Context](#1-the-settlement-trilemma-razorpay-ecosystem-context)
-- [2. Paradigm Shift: Continuous Reserves vs. Binary Freezes](#2-paradigm-shift-continuous-reserves-vs-binary-freezes)
-- [3. System Architecture](#3-system-architecture)
-- [4. Core Capabilities & Visual Walkthrough](#4-core-capabilities--visual-walkthrough)
-- [5. Implementation Reality Matrix](#5-implementation-reality-matrix)
-- [6. Measured Performance & Calibration Rigor](#6-measured-performance--calibration-rigor)
-- [7. Mathematical Formulation & Cost Optimization](#7-mathematical-formulation--cost-optimization)
-- [8. Production Hardening & Reliability](#8-production-hardening--reliability)
-- [9. API Contract & Live Payloads](#9-api-contract--live-payloads)
-- [10. Codebase Structure](#10-codebase-structure)
-- [11. Developer Quickstart](#11-developer-quickstart)
-- [12. Docker & Container Deployment](#12-docker--container-deployment)
-- [13. Known Limitations & Engineering Roadmap](#13-known-limitations--engineering-roadmap)
+- [1. Razorpay Track 02 Alignment: What Problem We Solve](#1-razorpay-track-02-alignment-what-problem-we-solve)
+- [2. The Settlement Trilemma: Razorpay Ecosystem Context](#2-the-settlement-trilemma-razorpay-ecosystem-context)
+- [3. Paradigm Shift: Continuous Reserves vs. Binary Freezes](#3-paradigm-shift-continuous-reserves-vs-binary-freezes)
+- [4. System Architecture](#4-system-architecture)
+- [5. Core Capabilities & Visual Walkthrough](#5-core-capabilities--visual-walkthrough)
+- [6. Implementation Reality Matrix](#6-implementation-reality-matrix)
+- [7. Measured Performance & Calibration Rigor](#7-measured-performance--calibration-rigor)
+- [8. Mathematical Formulation & Cost Optimization](#8-mathematical-formulation--cost-optimization)
+- [9. Production Hardening & Reliability](#9-production-hardening--reliability)
+- [10. API Contract & Live Payloads](#10-api-contract--live-payloads)
+- [11. Codebase Structure](#11-codebase-structure)
+- [12. Developer Quickstart](#12-developer-quickstart)
+- [13. Docker & Container Deployment](#13-docker--container-deployment)
+- [14. Known Limitations & Engineering Roadmap](#14-known-limitations--engineering-roadmap)
 
 ---
 
-## 1. The Settlement Trilemma: Razorpay Ecosystem Context
+## 1. Razorpay Track 02 Alignment: What Problem We Solve
+
+This project directly answers **Track 02: AI Risk Manager** (*"Stop the merchant losing money to fraud, returns and chargebacks"*).
+
+### The Problem in Indian BFSI & Payment Gateways
+Coordinated refund fraud syndicates execute multi-account attack bursts across disparate merchant accounts using shared hardware devices, UPI VPAs, and proxy IPs.
+
+Today, gateway fraud engines react with **binary all-or-nothing holdouts**:
+* When a single compromised device connects fraud across 4 merchant accounts, legacy systems freeze **100% of settlement funds across all 4 sellers**.
+* **Collateral Merchant Insolvency:** Honest merchants lose their daily working capital during festive peaks, facing sudden cash-flow failure.
+* **14-Day Dispute Queues:** Legitimate sellers wait weeks for manual review teams to inspect physical delivery slips, driving merchant churn.
+
+```
+[Syndicate Device Cluster] ─── triggers ───> Legacy 100% Account Hold
+                                                     │
+               ┌─────────────────────────────────────┴─────────────────────────────────────┐
+               ▼                                                                           ▼
+   1 Malicious Actor Blocked                                                3 Innocent Merchants Frozen
+                                                                            (0% Cash Flow, 14-Day Queue)
+```
+
+---
+
+### How Docket Risk Solves It: The 3 Core Pillars
+
+| Track 02 Requirement | Docket Risk Solution | Technical Mechanism |
+| :--- | :--- | :--- |
+| **Abuse-Ring Sentinel & Fraud Detector** | Sub-15ms Multi-Partite Graph Clustering | In-memory Disjoint Union-Find ($O(\alpha(N))$) + Monotonic XGBoost achieving **`PR-AUC = 0.9142`** on a held-out temporal test set. |
+| **Return-Risk Scorer & Capital Optimizer** | Graduated Rolling Reserves (15%-20%) | Preserves **80%+ daily settlement liquidity** for legitimate merchants instead of a blunt 100% account freeze. |
+| **Chargeback Evidence & Auto-Responder** | Carrier-Verified Auto-Unfreeze Sandbox | Queries BlueDart/Delhivery EDI APIs, severs false-positive edges, drops risk from **`94.2%` to `3.8%`**, and emits instant RTGS release webhooks in < 3s. |
+
+---
+
+### Exceeding "The Bar"
+
+* **Honest Metrics Including False-Positive Cost:** Evaluated on an explicit camouflage cohort (800 merchants sharing co-working space IPs) with a formalized asymmetric friction cost ($C_{\text{FP}} = 0.08 \times A_i$), proving an **81% reduction in false-positive merchant friction**.
+* **Strictly Defense-Only:** Operates 100% as defensive gateway infrastructure. Customer identifiers are tokenized using salted HMAC-SHA256 to ensure full compliance with the Digital Personal Data Protection (DPDP) Act and RBI norms.
+
+---
+
+## 2. The Settlement Trilemma: Razorpay Ecosystem Context
 
 In high-velocity payment gateways (e.g., Razorpay, Stripe), risk infrastructure operates at the intersection of three competing objectives:
 
@@ -86,17 +127,11 @@ $$\text{Expected Chargeback Liability} \quad \longleftrightarrow \quad \text{Mer
                                    (14-day dispute backlogs)
 ```
 
-### Why Legacy Rule Engines Fail
-When refund syndicates coordinate attacks across multiple merchant IDs using shared hardware:
-* **Binary Holds Destroy Innocent Sellers:** When 1 compromised device links fraud across 4 merchant accounts, legacy systems enforce a **100% payout freeze** across all 4 sellers, causing cash-flow insolvency for innocent businesses.
-* **Opaque Notices:** Sellers receive generic form emails with zero transparency into model evidence.
-* **14-Day Queues:** Manual support teams take weeks to verify shipping slips, leading to high merchant churn.
-
-**Docket Risk** solves this by bridging **Thirdwatch graph clustering** with **Route settlement schedules**, substituting binary freezes with **graduated rolling reserves (15% to 20%)** while unlocking **80%+ daily settlement liquidity**.
+**Docket Risk** bridges **Thirdwatch graph clustering** with **Route settlement schedules**, substituting binary freezes with **graduated rolling reserves (15% to 20%)** while unlocking **80%+ daily settlement liquidity**.
 
 ---
 
-## 2. Paradigm Shift: Continuous Reserves vs. Binary Freezes
+## 3. Paradigm Shift: Continuous Reserves vs. Binary Freezes
 
 | Decision Dimension | Legacy Rule Gateways | Docket Risk Engine |
 | :--- | :--- | :--- |
@@ -109,7 +144,7 @@ When refund syndicates coordinate attacks across multiple merchant IDs using sha
 
 ---
 
-## 3. System Architecture
+## 4. System Architecture
 
 ```mermaid
 flowchart TD
@@ -134,7 +169,7 @@ flowchart TD
 
 ---
 
-## 4. Core Capabilities & Visual Walkthrough
+## 5. Core Capabilities & Visual Walkthrough
 
 ### 1. Central Operations & Overview Dashboard
 High-level control room showing real-time settlement liquidity velocity, flagged claim distribution, and graph density KPIs.
@@ -191,7 +226,7 @@ An interactive attack studio directly integrated with backend scoring. Unlike st
 
 ---
 
-## 5. Implementation Reality Matrix
+## 6. Implementation Reality Matrix
 
 To provide total clarity for technical reviewers, the matrix below details live runtime code vs. simulated contracts:
 
@@ -210,7 +245,7 @@ To provide total clarity for technical reviewers, the matrix below details live 
 
 ---
 
-## 6. Measured Performance & Calibration Rigor
+## 7. Measured Performance & Calibration Rigor
 
 All numbers below were measured directly on the held-out temporal test set ($N = 3,877$ claims, Months 1-4 train, Month 5 validation, Month 6 test) and verified via automated test suites:
 
@@ -238,7 +273,7 @@ At the recommended high-risk cutoff ($\tau \ge 0.85$):
 
 ---
 
-## 7. Mathematical Formulation & Cost Optimization
+## 8. Mathematical Formulation & Cost Optimization
 
 Risk policy optimization balances financial losses under an asymmetric cost function:
 
@@ -252,7 +287,7 @@ Where:
 
 ---
 
-## 8. Production Hardening & Reliability
+## 9. Production Hardening & Reliability
 
 * **Dual Fail-Open Protection:** If a model file is missing at startup or scoring encounters an unexpected exception, the engine fails open (`AUTO_APPROVE` with `degraded=true`) to protect checkout conversion. It never returns a 500 status on `/score`.
 * **Atomic Concurrency (No TOCTOU):** Feature computation, graph edge insertion, and claim recording execute under a single re-entrant lock, preventing race conditions during synchronized attack bursts.
@@ -262,7 +297,7 @@ Where:
 
 ---
 
-## 9. API Contract & Live Payloads
+## 10. API Contract & Live Payloads
 
 The scoring service exposes production REST endpoints with API-key authentication (`X-API-Key`):
 
@@ -303,7 +338,7 @@ curl -X POST http://localhost:8000/v1/score \
 
 ---
 
-## 10. Codebase Structure
+## 11. Codebase Structure
 
 ```text
 docket-risk/
@@ -328,7 +363,7 @@ docket-risk/
 
 ---
 
-## 11. Developer Quickstart
+## 12. Developer Quickstart
 
 Get the backend service and React console running locally in less than 2 minutes:
 
@@ -358,7 +393,7 @@ Open [http://localhost:5173](http://localhost:5173) to access the ops console.
 
 ---
 
-## 12. Docker & Container Deployment
+## 13. Docker & Container Deployment
 
 ```bash
 # Build frontend bundle
@@ -385,7 +420,7 @@ docker compose up --build
 
 ---
 
-## 13. Known Limitations & Engineering Roadmap
+## 14. Known Limitations & Engineering Roadmap
 
 ### Documented Limitations
 1. **Domestic Currency Rails:** Optimized for INR rails (UPI, IMPS, RTGS). Cross-border currency conversion and SWIFT dispute buffers are out of scope.
