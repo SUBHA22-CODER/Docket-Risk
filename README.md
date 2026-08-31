@@ -1,21 +1,34 @@
 <div align="center">
 
-# Docket Risk
+# 🛡️ Docket Risk
 
-### Risk-Adjusted Capital Allocation & Continuous Settlement Reserves for Payment Gateways
+### Autonomous Risk Decisioning & Continuous Capital Reserves for Payment Gateways
 
-[![CI Workflow](https://img.shields.io/badge/CI-Passing-10b981.svg?style=flat-square&logo=githubactions&logoColor=white)](https://github.com/SUBHA22-CODER/Docket-Risk/actions)
-[![Python Version](https://img.shields.io/badge/Python-3.11-3776AB.svg?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Production-009688.svg?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React%2018-TypeScript-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://reactjs.org)
-[![Tests](https://img.shields.io/badge/Tests-29%2F29%20Passing-brightgreen.svg?style=flat-square&logo=pytest&logoColor=white)](https://github.com/SUBHA22-CODER/Docket-Risk)
-[![Latency](https://img.shields.io/badge/P99%20Latency-%3C15ms-blue.svg?style=flat-square&logo=speedtest&logoColor=white)](https://github.com/SUBHA22-CODER/Docket-Risk)
+<p align="center">
+  <a href="https://github.com/SUBHA22-CODER/Docket-Risk/actions"><img src="https://img.shields.io/badge/CI_Workflow-Passing-10b981?style=for-the-badge&logo=githubactions&logoColor=white" alt="CI Workflow"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Version"></a>
+  <a href="https://fastapi.tiangolo.com"><img src="https://img.shields.io/badge/FastAPI-Production-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"></a>
+  <a href="https://reactjs.org"><img src="https://img.shields.io/badge/React_18-TypeScript-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 18"></a>
+  <a href="https://github.com/SUBHA22-CODER/Docket-Risk"><img src="https://img.shields.io/badge/Pytest-29%2F29_Passed-10b981?style=for-the-badge&logo=pytest&logoColor=white" alt="Tests"></a>
+  <a href="https://github.com/SUBHA22-CODER/Docket-Risk"><img src="https://img.shields.io/badge/P99_Latency-%3C15ms-0284c7?style=for-the-badge&logo=speedtest&logoColor=white" alt="Latency"></a>
+</p>
 
-```
-Sub-15ms In-Memory Graph  •  Monotonic XGBoost  •  Graduated Rolling Reserves  •  Carrier EDI Unfreeze
-```
+<p align="center">
+  <strong>Sub-15ms In-Memory Graph</strong> &nbsp;•&nbsp; 
+  <strong>Monotonic XGBoost</strong> &nbsp;•&nbsp; 
+  <strong>Graduated Rolling Reserves</strong> &nbsp;•&nbsp; 
+  <strong>Carrier EDI Unfreezes</strong>
+</p>
 
-[Overview](#overview) • [How It Works](#how-it-works) • [Product Tour](#product-tour) • [Benchmarks](#measured-benchmarks) • [API Contract](#api-contract) • [Quickstart](#quickstart)
+<p align="center">
+  <a href="#the-settlement-trilemma"><b>The Problem</b></a> &nbsp;•&nbsp;
+  <a href="#continuous-reserves-vs-binary-freezes"><b>Paradigm Shift</b></a> &nbsp;•&nbsp;
+  <a href="#how-it-works"><b>Architecture</b></a> &nbsp;•&nbsp;
+  <a href="#product-tour"><b>Live Demos</b></a> &nbsp;•&nbsp;
+  <a href="#measured-benchmarks"><b>Benchmarks</b></a> &nbsp;•&nbsp;
+  <a href="#api-contract"><b>API Spec</b></a> &nbsp;•&nbsp;
+  <a href="#quickstart"><b>Quickstart</b></a>
+</p>
 
 ---
 
@@ -27,31 +40,25 @@ Sub-15ms In-Memory Graph  •  Monotonic XGBoost  •  Graduated Rolling Reserve
 
 ---
 
-## Overview
+## The Settlement Trilemma
 
-### The Problem: Binary Freezes Cause Collateral Insolvency
+In payment gateways like Razorpay, risk operations is an economic balancing act:
 
-In payment gateways like Razorpay, fraud syndicates use shared devices and proxy networks to execute refund bursts across multiple merchant accounts. 
+$$\text{Chargeback Liability} \quad \longleftrightarrow \quad \text{Merchant Liquidity} \quad \longleftrightarrow \quad \text{Support Churn Friction}$$
 
-Legacy rule engines enforce **binary all-or-nothing holds**:
+Legacy fraud engines enforce **binary all-or-nothing holds**:
 
-```
-[1 Compromised Device] ─── links to ───> [4 Merchant Accounts]
-                                                │
-                                                ▼
-                                    Legacy 100% Payout Freeze
-                                                │
-                 ┌──────────────────────────────┴──────────────────────────────┐
-                 ▼                                                             ▼
-    1 Fraudulent Actor Stopped                             3 Innocent Merchants Driven Insolvent
-                                                            (0% Daily Cash Flow, 14-Day Queue)
-```
+* **Collateral Insolvency:** When a single compromised device is detected across multiple merchants, legacy systems freeze 100% of payout funds across all linked accounts.
+* **Opaque Notices:** Merchants receive generic policy violation notices with zero visibility into model evidence.
+* **14-Day Queues:** Legitimate sellers wait weeks for manual dispute reviews, leading to merchant churn.
 
-### The Solution: Continuous Risk-Adjusted Reserves
+**Docket Risk** transforms fraud decisioning from a binary gate into a **continuous, risk-adjusted capital allocation engine** operating at sub-15ms latency.
 
-Docket Risk evaluates risk continuously at sub-15ms latency, allocating **graduated rolling reserves** (15% to 20%) that protect against default while releasing **80%+ of daily working capital** to legitimate sellers.
+---
 
-| Capability | Legacy Rule Gateways | Docket Risk Engine |
+## Continuous Reserves vs. Binary Freezes
+
+| Metric | Legacy Rule Gateways | Docket Risk Engine |
 | :--- | :--- | :--- |
 | **Decision Policy** | Binary (0% payout or 100% account freeze) | Graduated (0%, 15%, 20%, 25% rolling reserves) |
 | **Merchant Liquidity** | 0% working capital during reviews | 80%+ daily settlement cash released |
