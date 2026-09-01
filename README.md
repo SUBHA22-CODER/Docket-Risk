@@ -146,20 +146,9 @@ $$\text{Expected Chargeback Liability} \quad \longleftrightarrow \quad \text{Mer
 
 ## 4. System Architecture
 
-```mermaid
-flowchart TD
-    A["Incoming Transaction Stream"] --> B["Deterministic In-Memory Union-Find"]
-    B -->|"O(alpha(N)) Path Compression"| C["Monotonic XGBoost Inference Engine"]
-    C -->|"Point-in-Time Features"| D{"Risk Policy Decision"}
-    
-    D -->|"Score under 0.50"| E["LOW BAND: Instant RTGS Release"]
-    D -->|"Score 0.50 to 0.85"| F["MEDIUM BAND: 15% to 20% Rolling Reserve"]
-    D -->|"Score 0.85 and above"| G["HIGH BAND: Pre-Settlement Payout Hold"]
-    
-    G --> H["Merchant Appeal Sandbox"]
-    H -->|"Validate Carrier EDI Proof"| I["Sever Peripheral Graph Edge"]
-    I -->|"Risk Drops to 3.8%"| J["Automated RTGS Payout Release Webhook"]
-```
+<p align="center">
+  <img src="docs/images/system_architecture.png" alt="Docket Risk End-to-End System Architecture and Decision Pipeline" width="100%">
+</p>
 
 ### End-to-End Pipeline
 1. **Deterministic Union-Find (`GraphState`):** Ingests orders and unifies nodes across 5 infrastructure dimensions (`device_id`, `vpa_id`, `phone_id`, `address_id`, `card_id`) in $O(\alpha(N))$ time.
