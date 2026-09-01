@@ -148,17 +148,17 @@ $$\text{Expected Chargeback Liability} \quad \longleftrightarrow \quad \text{Mer
 
 ```mermaid
 flowchart TD
-    A[Incoming Transaction Stream] --> B[Deterministic In-Memory Union-Find]
-    B -->|Near O 1 Path Compression| C[Monotonic XGBoost Inference Engine]
-    C -->|Point-in-Time Features| D{Risk Policy Decision}
+    A["Incoming Transaction Stream"] --> B["Deterministic In-Memory Union-Find"]
+    B -->|"O(alpha(N)) Path Compression"| C["Monotonic XGBoost Inference Engine"]
+    C -->|"Point-in-Time Features"| D{"Risk Policy Decision"}
     
-    D -->|Score < 0.50| E[LOW BAND: Instant RTGS Release]
-    D -->|0.50 <= Score < 0.85| F[MEDIUM BAND: 15%-20% Rolling Reserve + Step-Up OTP]
-    D -->|Score >= 0.85| G[HIGH BAND: Pre-Settlement Payout Hold]
+    D -->|"Score under 0.50"| E["LOW BAND: Instant RTGS Release"]
+    D -->|"Score 0.50 to 0.85"| F["MEDIUM BAND: 15% to 20% Rolling Reserve"]
+    D -->|"Score 0.85 and above"| G["HIGH BAND: Pre-Settlement Payout Hold"]
     
-    G --> H[Merchant Appeal Sandbox]
-    H -->|Validate Carrier EDI Proof| I[Sever Peripheral Graph Edge]
-    I -->|Score drops to 3.8%| J[Automated RTGS Payout Release Webhook]
+    G --> H["Merchant Appeal Sandbox"]
+    H -->|"Validate Carrier EDI Proof"| I["Sever Peripheral Graph Edge"]
+    I -->|"Risk Drops to 3.8%"| J["Automated RTGS Payout Release Webhook"]
 ```
 
 ### End-to-End Pipeline
