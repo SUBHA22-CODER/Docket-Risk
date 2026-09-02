@@ -25,16 +25,19 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import hmac
+import ipaddress
 import json
 import logging
 import os
 import queue as _queue
 import re
+import socket
 import sqlite3
 import sys
 import threading
 import time
 import urllib.request
+from urllib.parse import urlparse
 import uuid
 from collections import OrderedDict, defaultdict, deque
 from collections.abc import Callable
@@ -473,6 +476,8 @@ class AuditLog:
         self.path = path
         os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self.conn = sqlite3.connect(path, check_same_thread=False)
+        self.conn.execute("PRAGMA journal_mode=WAL")
+        self.conn.execute("PRAGMA synchronous=NORMAL")
         self.conn.execute(
             """
             CREATE TABLE IF NOT EXISTS decisions (
@@ -493,6 +498,12 @@ class AuditLog:
         )
         self.conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_decisions_ts ON decisions(ts)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_decisions_claim ON decisions(claim_id)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_decisions_identity ON decisions(identity_key)"
         )
         self.conn.execute(
             """
@@ -536,6 +547,9 @@ class AuditLog:
               updated_by TEXT
             )
             """
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_case_state_sla ON case_state(sla_due_at)"
         )
         self.conn.execute(
             """
@@ -1125,6 +1139,10 @@ def _do_score(claim: ClaimIn, shadow: bool, request: Request) -> ScoreOut:
         pd_ts = pd_ts.tz_localize(timezone.utc)
     else:
         pd_ts = pd_ts.tz_convert(timezone.utc)
+    now_utc = pd.Timestamp.now(tz=timezone.utc)
+    if pd_ts > now_utc + pd.Timedelta(seconds=60):
+        # Prevent future-timestamp velocity evasion: clamp anchor to current server time
+        pd_ts = now_utc
 
     degradation: list[str | None] = [None]
 
@@ -2004,12 +2022,35 @@ async def merchant_risk_endpoint(
 
 # ---- signed webhook test-fire ----------------------------------------------------
 
+def _is_safe_webhook_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+        hostname = parsed.hostname
+        if not hostname:
+            return False
+        if hostname.lower() in ("localhost", "127.0.0.1", "::1", "169.254.169.254"):
+            return False
+        ip = socket.gethostbyname(hostname)
+        addr = ipaddress.ip_address(ip)
+        return not (addr.is_private or addr.is_loopback or addr.is_link_local)
+    except Exception:
+        return False
+
+
 class WebhookTestIn(BaseModel):
     url: str = Field(min_length=8, max_length=300)
 
 
 @app.post("/v1/webhooks/test", dependencies=[Depends(auth_guard)])
 async def webhook_test(body: WebhookTestIn, request: Request) -> dict:
+    if not _is_safe_webhook_url(body.url):
+        raise ApiError(
+            422,
+            "ssrf_protection",
+            "webhook destination must resolve to a valid public IP address",
+        )
     payload = {
         "topic": "webhook.test",
         "ts": datetime.now(timezone.utc).isoformat(),

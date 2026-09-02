@@ -431,6 +431,13 @@ docker compose up --build
 * **Dynamic Graph Embeddings:** Implement continuous temporal graph embeddings (e.g., Dynamic Node2Vec) to capture long-horizon syndicate sleep cycles.
 * **Direct Carrier EDI Integration:** Wire live mTLS webhooks to BlueDart, Delhivery, and India Post production APIs.
 
+### Production Architecture Trade-offs & Reviewer Notes
+* **In-Memory DisjointSet vs. Distributed Adjacency:** For sub-15ms local inference during evaluation, graph operations run in-memory backed by `threading.RLock` and periodic disk snapshots. The included `docker-compose.yml` provisions PostgreSQL and Redis to support transitioning adjacency structures to Redis Sets/Hashes in horizontal Kubernetes deployments.
+* **Database Concurrency:** SQLite audit log runs with Write-Ahead Logging (`PRAGMA journal_mode=WAL`) and normalized synchronous commits to ensure non-blocking read/write concurrency under load.
+* **Adversarial Timestamp Anchoring:** Velocity lookback bursts are anchored against server reception time (`pd_ts <= now_utc`) to block future-dated and backdated evasion attacks.
+* **SSRF Defense:** Webhook dispatch verification strictly validates destination IP addresses, disallowing loopback, link-local, and private cloud metadata subnets (e.g., AWS IMDS).
+* **Data Privacy (DPDP Act 2023):** Tokenization helper routines (`anonymize_pii_token`) using HMAC-SHA256 are provided in `src/config.py` for gateway pseudonymization before persistence.
+
 ---
 
 ## Technical Documentation
