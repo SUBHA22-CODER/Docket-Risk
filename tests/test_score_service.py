@@ -3,6 +3,7 @@ fail-open behavior, shadow scoring, and operational endpoints."""
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 import sys
 from pathlib import Path
 
@@ -171,3 +172,28 @@ def test_missing_model_startup_fails_open(monkeypatch):
     finally:
         ss._model = saved_model
         ss._model_sha256_short, ss._model_sha_verified = saved_sha
+
+
+def test_webhook_rejects_ssrf_destinations(client):
+    for evil_url in [
+        "http://127.0.0.1:8000/evil",
+        "http://localhost/evil",
+        "http://169.254.169.254/latest/meta-data",
+    ]:
+        r = client.post("/v1/webhooks/test", json={"url": evil_url}, headers=AUTH)
+        assert r.status_code == 422
+        assert r.json()["error"]["code"] == "ssrf_protection"
+
+
+def test_scoring_handles_future_timestamp_safely(client):
+    ident = "USR_FUT1"
+    client.post("/v1/ingest/order", json=_order("ORD_FUT1", ident), headers=AUTH)
+    future_ts = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
+    claim_payload = _claim("CLM_FUT1", ident)
+    claim_payload["ts"] = future_ts
+    r = client.post("/v1/score", json=claim_payload, headers=AUTH)
+    assert r.status_code == 200
+    body = r.json()
+    assert body["claim_id"] == "CLM_FUT1"
+    assert body["score"] is not None
+
