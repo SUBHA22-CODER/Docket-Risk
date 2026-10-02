@@ -534,5 +534,5 @@ docker compose up --build
 * 🎯 **Judge Q&A Cheat Sheet:** [docs/judge_qa.md](docs/judge_qa.md) (Empirical numbers memorized directly from pipeline)
 
 <div align="center">
-<sub>Built with precision for the Razorpay AI Buildathon 2026 | Universal Multi-Gateway AI Risk Manager Track</sub>
+<sub>Built with for Universal Multi-Gateway AI Risk Manager </sub>
 </div>
