@@ -9,9 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@types/three": "^0.186.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "motion": "^13.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
+    "tailwind-merge": "^3.7.0",
+    "three": "^0.186.1",
     "vis-network": "^9.1.9"
   },
   "devDependencies": {
